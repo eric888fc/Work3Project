@@ -1,147 +1,189 @@
-# Delivery Platform — Java Swing 外送系統
+# 🚚 Delivery Platform — Java Swing 外送系統
 
-## 🚀 專案簡介
-這是一個以 **Java Swing** 製作的桌面應用程式，模擬真實的「外送平台」運作。  
-系統支援 **會員登入註冊、商品瀏覽、購物車、下單、訂單管理、後台管理員介面** 等核心功能。  
+![Java](https://img.shields.io/badge/Java-Swing-orange?logo=java)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Build](https://img.shields.io/badge/build-Maven-blue)
+![UI](https://img.shields.io/badge/UI-Desktop-blueviolet)
 
-專案以 **MVC + 三層架構（Controller / Service / DAO）** 設計，並使用 **Maven** 管理依賴，方便維護與擴充。  
+> 一個以 **Java Swing** 製作的桌面應用程式，模擬真實的「外送平台」運作流程。  
+> 系統支援會員登入、購物、下單、錢包支付、訂單派送、後台管理等完整功能。  
 
 ---
 
-## 🧩 系統架構概覽
+## 🧩 專案簡介
+
+本專案以 **MVC + 三層架構（Controller / Service / DAO）** 設計，  
+搭配 **Maven 專案管理**，並採模組化 Swing 介面開發，適合作為  
+🎓 **課堂專案展示** 或 💼 **桌面應用架構範例**。
 
 ```
+
+## 📂 專案結構
+
 📦 src/main/java
-├── controller/           # 前端 GUI 控制層 (Swing 視窗)
-│   ├── LoginUi.java           # 登入畫面 (Main entry)
-│   ├── MainUi.java            # 主選單 / 首頁
-│   ├── CartPanel.java         # 購物車面板
-│   ├── OrderPanel.java        # 訂單管理頁
-│   ├── ProductPanel.java      # 商品瀏覽與加入購物車
-│   ├── AdminUi.java           # 管理者後台主頁
-│   ├── EmployeePanel.java     # 員工管理頁
-│   ├── MemberPanel.java       # 會員個人中心
-│   └── ProfilePanel.java      # 使用者資料修改介面
+├── controller/ # 視覺化介面控制層 (Swing)
+│ ├── LoginUi.java # 登入畫面（程式進入點）
+│ ├── MainUi.java # 主選單 / 首頁
+│ ├── CartPanel.java # 購物車頁面
+│ ├── OrderPanel.java # 訂單管理
+│ ├── ProductPanel.java # 商品瀏覽與加入購物車
+│ ├── EmployeePanel.java # 外送員管理
+│ ├── MemberPanel.java # 會員中心
+│ ├── ProfilePanel.java # 個人資料設定
+│ └── AdminUi.java # 後台管理介面
 │
-├── po/                    # 實體 (POJO)
-│   ├── Member.java             # 會員資料
-│   ├── Product.java            # 商品資訊
-│   ├── Order.java              # 訂單主檔
-│   ├── OrderItem.java          # 訂單明細
-│   ├── Employee.java           # 員工資料
-│   └── Admin.java              # 管理員資料
+├── po/ # 實體類別 (POJO)
+│ ├── Member.java
+│ ├── Product.java
+│ ├── Order.java
+│ ├── OrderItem.java
+│ ├── Employee.java
+│ └── Admin.java
 │
-├── po/dao/                # DAO 介面
-│   ├── MemberDao.java
-│   ├── ProductDao.java
-│   ├── OrderDao.java
-│   └── ...
+├── po/dao/ # DAO 介面 (資料存取層)
+│ ├── MemberDao.java
+│ ├── ProductDao.java
+│ ├── OrderDao.java
+│ └── ...
 │
-├── po/dao/impl/           # DAO 實作
-│   ├── MemberDaoImpl.java
-│   ├── ProductDaoImpl.java
-│   ├── OrderDaoImpl.java
-│   └── ...
+├── po/dao/impl/ # DAO 實作類
+│ ├── MemberDaoImpl.java
+│ ├── ProductDaoImpl.java
+│ ├── OrderDaoImpl.java
+│ └── ...
 │
-├── po/service/            # Service 層介面
-│   ├── MemberService.java
-│   ├── ProductService.java
-│   ├── OrderService.java
-│   └── ...
+├── po/service/ # Service 層 (商業邏輯)
+│ ├── MemberService.java
+│ ├── ProductService.java
+│ ├── OrderService.java
+│ └── ...
 │
-├── po/service/impl/       # Service 實作層
-│   ├── MemberServiceImpl.java
-│   ├── ProductServiceImpl.java
-│   ├── OrderServiceImpl.java
-│   └── ...
+├── po/service/impl/ # Service 實作
+│ ├── MemberServiceImpl.java
+│ ├── ProductServiceImpl.java
+│ ├── OrderServiceImpl.java
+│ └── ...
 │
-└── util/
-    └── DBUtil.java        # 資料連線與共用方法 (可替換成任何資料來源)
+└── util/ # 工具類
+├── DBUtil.java # 資料庫連線工具
+├── EmailUtil.java # 郵件寄送功能
+└── CartIoUtil.java # 購物車資料存取工具
+
 ```
 
----
+## 🧠 架構說明（分層設計）
 
-## 🧠 系統邏輯（分層設計說明）
-
-| 層級 | 說明 |
-|------|------|
-| **Controller (UI)** | 負責使用者互動與畫面更新，例如登入視窗、商品清單、購物車頁面等。透過事件監聽呼叫 Service 層。 |
-| **Service (業務邏輯)** | 包含主要邏輯流程，如會員註冊驗證、購物車計算、訂單建立與更新狀態等。 |
-| **DAO (資料存取)** | 封裝資料來源操作（例如資料庫或檔案）。即使不連資料庫，也能模擬 CRUD 邏輯。 |
-| **PO (實體類別)** | 對應系統中的實體資料，例如商品、訂單、會員。所有屬性皆採封裝原則並搭配 getter/setter。 |
-| **Util (工具類)** | 通用輔助，例如連線管理、輸入驗證、日期格式轉換等。 |
+| 層級 | 功能 | 說明 |
+|------|------|------|
+| **Controller (UI)** | 視覺化介面層 | 處理使用者操作與 Swing 事件監聽，呼叫 Service 層。 |
+| **Service (業務邏輯)** | 邏輯處理層 | 處理會員登入、訂單建立、派單等核心邏輯。 |
+| **DAO (資料存取)** | 資料層 | 負責連接資料庫（MySQL）並進行 CRUD 操作。 |
+| **PO (實體類)** | 資料模型層 | 封裝會員、商品、訂單等物件屬性。 |
+| **Util (工具類)** | 公用功能層 | 例如寄信、序列化、時間轉換、資料庫工具。 |
 
 ---
 
-## 🖥️ 主要畫面與功能流程
+## 🖥️ 功能介紹
 
 | 模組 | 功能描述 |
 |------|-----------|
-| **LoginUi** | 系統入口點。支援會員登入、註冊、新使用者建立。 |
-| **MainUi** | 使用者主選單（包含商品瀏覽、訂單查詢、購物車等功能入口）。 |
-| **CartPanel** | 顯示已加入的商品，提供修改數量、刪除商品與結帳功能。 |
-| **OrderPanel** | 顯示歷史訂單清單與狀態更新。 |
-| **AdminUi** | 管理員後台介面，可檢視會員、員工、商品、訂單。 |
-| **EmployeePanel** | 員工資料維護，提供 CRUD 功能。 |
-| **ProfilePanel** | 修改會員個人資料（例如地址、電話）。 |
+| **會員功能** | 登入 / 註冊 / 修改個資 / 錢包餘額管理 |
+| **商品管理** | 瀏覽商品、加入購物車、修改數量 |
+| **購物車系統** | 檢視購物明細、選擇付款方式（現金 / 電子錢包） |
+| **訂單系統** | 建立訂單、顯示歷史訂單、查看派送員 |
+| **外送員派單** | 管理員可批量指派未處理訂單並寄送通知信 |
+| **報表匯出** | 支援 Excel 匯出訂單明細 |
+| **郵件通知** | 訂單建立或派單後自動寄信至會員 Gmail |
 
 ---
 
-## ⚙️ 技術特性
-- **Java Swing**：視覺化桌面應用介面  
-- **Maven 專案管理**  
-- **三層式架構 (DAO / Service / Controller)**  
-- **物件導向設計 (OOP)**  
-- **模組化 UI（Panel-based navigation）**  
-- **可擴充性**：DAO 層可替換成 REST API、JSON、XML 或本地資料檔案  
+## 💳 付款流程範例
+
+### 電子錢包付款
+
+1. 檢查會員餘額  
+2. 若不足 → 引導至「個人資料」頁面儲值  
+3. 若足夠 → 扣款、更新 `wallet_after` 欄位  
+4. 建立訂單並寄送通知信  
+
+### 現金付款
+
+1. 輸入金額 → 自動計算找零  
+2. 儲存訂單 → 找零金額同步更新至訂單  
+3. 顯示「找零金額」與訂單編號  
 
 ---
 
-## 🧩 範例功能流程
+## ⚙️ 開發環境建議
 
-### 🔑 登入流程
-```
-LoginUi.java
- └── 檢查帳號密碼 → MemberService → MemberDao
-     └── 成功登入 → MainUi 顯示主選單
-```
-
-### 🛒 購物流程
-```
-ProductPanel.java
- └── 加入商品至購物車 → CartPanel.java
-     └── 按下「結帳」 → OrderService 建立訂單 → OrderDao 新增紀錄
-```
-
-### 🧾 管理者功能
-```
-AdminUi.java
- ├── 瀏覽所有會員與訂單
- ├── 管理商品資料
- └── 檢視報表與統計資訊
-```
+| 工具 | 推薦版本 |
+|------|-----------|
+| **JDK** | 8 (Java SE 1.8) 或以上 |
+| **IDE** | IntelliJ IDEA / Eclipse |
+| **構建工具** | Maven |
+| **資料庫** | MySQL 8.x |
+| **字元編碼** | UTF-8 |
 
 ---
 
-## 🧰 開發環境建議
-| 工具 | 版本 |
-|------|------|
-| JDK | 8+ |
-| IDE | IntelliJ IDEA / Eclipse |
-| 構建工具 | Maven |
-| UI Framework | Swing |
-| 字元編碼 | UTF-8 |
+## 📦 Maven 依賴（pom.xml 範例）
 
----
-
-## 🧱 專案特色
-- 完整分層結構，具教學與實戰參考價值  
-- 可獨立運行（不依賴伺服器）  
-- 適合作為**桌面應用程式架構範例**或**課堂專案展示**  
-- 方便後續擴充成 REST API 或 Web 前端  
-
----
-
-## 📜 授權
-本專案可自由使用於學術研究、教學與學習目的。  
-如需商業用途，請標註原作者與來源。
+```
+<properties>
+<maven.compiler.source>1.8</maven.compiler.source>
+<maven.compiler.target>1.8</maven.compiler.target>
+<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+</properties>
+<dependencies>
+<!--  MySQL Connector  -->
+<dependency>
+<groupId>mysql</groupId>
+<artifactId>mysql-connector-java</artifactId>
+<version>8.0.33</version>
+</dependency>
+<!--  Lombok：自動生成 getter/setter  -->
+<dependency>
+<groupId>org.projectlombok</groupId>
+<artifactId>lombok</artifactId>
+<version>1.18.32</version>
+<scope>provided</scope>
+</dependency>
+<!--  Log4j for logging  -->
+<dependency>
+<groupId>org.apache.logging.log4j</groupId>
+<artifactId>log4j-api</artifactId>
+<version>2.22.0</version>
+</dependency>
+<dependency>
+<groupId>org.apache.logging.log4j</groupId>
+<artifactId>log4j-core</artifactId>
+<version>2.22.0</version>
+</dependency>
+<dependency>
+<groupId>com.sun.mail</groupId>
+<artifactId>jakarta.mail</artifactId>
+<version>2.0.1</version>
+</dependency>
+<dependency>
+<groupId>org.apache.poi</groupId>
+<artifactId>poi</artifactId>
+<version>5.4.1</version>
+</dependency>
+<dependency>
+<groupId>org.apache.poi</groupId>
+<artifactId>poi-ooxml</artifactId>
+<version>5.4.1</version>
+</dependency>
+</dependencies>
+</project>
+```
+🧰 資料庫結構（主要資料表）
+```
+資料表	說明
+member	儲存會員帳號、密碼、餘額等資訊
+product	商品清單與價格
+orders	訂單主檔（含 wallet_after）
+order_items	訂單明細
+employee	外送員資料
+admin	管理者帳號
+```
