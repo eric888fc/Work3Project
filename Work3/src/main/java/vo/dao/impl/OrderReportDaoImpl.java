@@ -66,8 +66,10 @@ public class OrderReportDaoImpl implements OrderReportDao {
 	             "JOIN member m ON o.memberid = m.memberid " +
 	             "JOIN product p ON oi.productid = p.productid " +
 	             "LEFT JOIN employee e ON o.employeeid = e.employeeid " +
+	             "WHERE o.orderid = ? " + 
 	             "GROUP BY o.orderid " +
 	             "ORDER BY o.date DESC";
+
 
 
 		try (PreparedStatement ps = conn.prepareStatement(sql)) {

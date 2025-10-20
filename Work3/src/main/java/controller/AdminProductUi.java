@@ -67,8 +67,11 @@ public class AdminProductUi extends JPanel {
 
         JPanel btnPanel = new JPanel();
         JButton btnAdd = new JButton("新增");
+        btnAdd.setFont(new Font("新細明體", Font.BOLD, 16));
         JButton btnUpdate = new JButton("修改");
+        btnUpdate.setFont(new Font("新細明體", Font.BOLD, 16));
         JButton btnDelete = new JButton("刪除");
+        btnDelete.setFont(new Font("新細明體", Font.BOLD, 16));
 
         btnPanel.add(btnAdd); btnPanel.add(btnUpdate); btnPanel.add(btnDelete);
         bottomPanel.add(btnPanel);
