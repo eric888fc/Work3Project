@@ -26,14 +26,23 @@ public class OrderServiceImpl implements OrderService {
     public void deleteOrder(String orderid) throws Exception {
         orderDao.deleteOrder(orderid);
     }
-    
+
     @Override
     public List<String> assignEmployeeToPendingOrdersAndReturnIds(String employeeid) throws Exception {
         return orderDao.assignEmployeeToPendingOrdersAndReturnIds(employeeid);
     }
+
     @Override
     public String getMemberGmailByOrderId(String orderId) throws Exception {
         return orderDao.getMemberGmailByOrderId(orderId);
     }
 
+    /** 新增方法：更新訂單付款後餘額 */
+    @Override
+    public void updateWalletAfter(String orderId, int walletAfter) throws Exception {
+        if (orderDao instanceof OrderDaoImpl) {
+            ((OrderDaoImpl) orderDao).updateWalletAfter(orderId, walletAfter);
+        }
+    }
 }
+

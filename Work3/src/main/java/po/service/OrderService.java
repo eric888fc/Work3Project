@@ -15,4 +15,7 @@ public interface OrderService {
 	List<String> assignEmployeeToPendingOrdersAndReturnIds(String employeeid) throws Exception;
 
 	String getMemberGmailByOrderId(String orderId) throws Exception;
+
+	/** 新增方法：更新訂單付款後餘額 */
+	void updateWalletAfter(String orderId, int walletAfter) throws Exception;
 }

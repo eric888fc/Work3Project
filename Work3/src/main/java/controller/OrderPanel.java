@@ -8,6 +8,8 @@ import po.Member;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
+
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -23,6 +25,9 @@ public class OrderPanel extends JPanel {
     private List<OrderReportVo> myOrders = new ArrayList<>();
     private Member currentMember;
 
+    private boolean checkboxMode = false; // 是否顯示 checkbox
+    private JButton btnCloseSelection;
+
     public OrderPanel(Member member) {
         this.currentMember = member;
         setLayout(new BorderLayout());
@@ -30,48 +35,71 @@ public class OrderPanel extends JPanel {
         // ===== 搜尋與工具列 =====
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         txtSearch = new JTextField(15);
-        JButton btnSearch = new JButton("搜尋");
         JButton btnExportExcel = new JButton("匯出 Excel");
         JButton btnViewDetail = new JButton("查看訂單細項");
+        btnCloseSelection = new JButton("關閉選取");
+        btnCloseSelection.setVisible(false);
 
         topPanel.add(new JLabel("搜尋訂單編號 / 外送員:"));
         topPanel.add(txtSearch);
-        topPanel.add(btnSearch);
         topPanel.add(btnExportExcel);
         topPanel.add(btnViewDetail);
+        topPanel.add(btnCloseSelection);
         add(topPanel, BorderLayout.NORTH);
 
         // ===== 表格設定 =====
         tableModel = new DefaultTableModel(new String[]{
-                "訂單編號", "總金額", "外送員", "日期", "付款方式", "電子錢包/找零"
-        }, 0);
-
-        table = new JTable(tableModel) {
+                "選取", "訂單編號", "總金額", "外送員", "日期", "付款方式", "電子錢包/找零"
+        }, 0) {
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                if (columnIndex == 0) return Boolean.class;
+                return String.class;
+            }
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false;
+                return column == 0; // 只有 checkbox 可編輯
             }
         };
+
+        table = new JTable(tableModel);
         table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        table.setRowHeight(25);
+        table.setRowHeight(28);
+        table.getColumnModel().getColumn(0).setCellEditor(new DefaultCellEditor(new JCheckBox()));
+        table.getColumnModel().getColumn(0).setCellRenderer(table.getDefaultRenderer(Boolean.class));
+        hideCheckboxColumn(); // 初始隱藏 checkbox
+
         table.getTableHeader().setFont(new Font("Microsoft JhengHei", Font.BOLD, 14));
         table.setFont(new Font("Microsoft JhengHei", Font.PLAIN, 13));
-
         add(new JScrollPane(table), BorderLayout.CENTER);
 
         // ===== 載入會員訂單資料 =====
         loadOrders(null);
 
         // ===== 按鈕事件 =====
-        btnSearch.addActionListener(e -> {
-            String keyword = txtSearch.getText().trim();
-            loadOrders(keyword.isEmpty() ? null : keyword);
+        txtSearch.addActionListener(e -> loadOrders(txtSearch.getText().trim().isEmpty() ? null : txtSearch.getText().trim()));
+
+        btnExportExcel.addActionListener(e -> {
+            if (!checkboxMode) {
+                showCheckboxColumn();
+                checkboxMode = true;
+                btnExportExcel.setText("匯出選中訂單");
+                btnCloseSelection.setVisible(true);
+            } else {
+                exportSelectedOrders();
+            }
         });
 
-        btnExportExcel.addActionListener(e -> exportSelectedOrders());
+        btnCloseSelection.addActionListener(e -> {
+            hideCheckboxColumn();
+            checkboxMode = false;
+            btnExportExcel.setText("匯出 Excel");
+            btnCloseSelection.setVisible(false);
+        });
+
         btnViewDetail.addActionListener(e -> viewSelectedOrderDetail());
 
-        // 🔹 雙擊表格列也可以查看訂單細項
+        // 雙擊表格列查看訂單細項
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -81,17 +109,19 @@ public class OrderPanel extends JPanel {
             }
         });
     }
-    
+
     /** 重新載入訂單資料，依照當前會員 */
     public void refreshData() {
-        loadOrders(null); // null 表示不帶搜尋條件，載入所有當前會員訂單
+        loadOrders(null);
     }
 
+    public void updateMember(Member newMember) {
+        this.currentMember = newMember;
+    }
 
     private void loadOrders(String keyword) {
         try {
             tableModel.setRowCount(0);
-            // 只取當前會員的訂單
             List<OrderReportVo> allReports = orderReportService.getAllOrderReports();
             myOrders.clear();
             for (OrderReportVo r : allReports) {
@@ -105,10 +135,11 @@ public class OrderPanel extends JPanel {
                     if ("電子錢包".equals(r.getPaymentMethod())) {
                         walletOrChange = "餘額：" + r.getWalletBalance() + " 元";
                     } else {
-                        walletOrChange = "現金付款";
+                        walletOrChange = "找零：" + r.getWalletBalance() + " 元";
                     }
 
                     tableModel.addRow(new Object[]{
+                            false, // checkbox
                             r.getOrderid(),
                             r.getTotal(),
                             r.getEmployeeName() == null ? "尚未指派" : r.getEmployeeName(),
@@ -132,91 +163,73 @@ public class OrderPanel extends JPanel {
             return;
         }
 
-        OrderReportVo selectedOrder = myOrders.get(row);
-        String orderId = selectedOrder.getOrderid();
+        OrderReportVo r = myOrders.get(row);
+        StringBuilder sb = new StringBuilder();
+        sb.append("===== 訂單明細 =====\n\n");
+        sb.append("訂單編號：").append(r.getOrderid()).append("\n");
+        sb.append("外送員：").append(r.getEmployeeName() == null ? "尚未指派" : r.getEmployeeName()).append("\n");
+        sb.append("日期：").append(r.getDate()).append("\n");
+        sb.append("付款方式：").append(r.getPaymentMethod()).append("\n\n");
+        sb.append("=== 商品明細 ===\n");
+        sb.append(r.getProductsDetail()).append("\n\n");
+        sb.append("總金額：").append(r.getTotal()).append(" 元\n");
 
-        try {
-            List<OrderReportVo> details = orderReportService.getReportsByOrderId(orderId);
-            if (details.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "查無此訂單細項！");
-                return;
-            }
-
-            OrderReportVo r = details.get(0);
-            StringBuilder sb = new StringBuilder();
-            sb.append("===== 訂單明細 =====\n\n");
-            sb.append("訂單編號：").append(r.getOrderid()).append("\n");
-            sb.append("外送員：").append(r.getEmployeeName() == null ? "尚未指派" : r.getEmployeeName()).append("\n");
-            sb.append("日期：").append(r.getDate()).append("\n");
-            sb.append("付款方式：").append(r.getPaymentMethod()).append("\n\n");
-
-            sb.append("=== 商品明細 ===\n");
-            sb.append(r.getProductsDetail()).append("\n");
-            sb.append("\n總金額：").append(r.getTotal()).append(" 元\n");
-
-            if ("電子錢包".equals(r.getPaymentMethod())) {
-                sb.append("電子錢包餘額：").append(r.getWalletBalance()).append(" 元\n");
-            }
-
-            sb.append("\n=======================");
-
-            // 使用 JDialog 自訂視窗
-            JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "訂單細項", true);
-            dialog.setLayout(new BorderLayout());
-
-            JTextArea textArea = new JTextArea(sb.toString());
-            textArea.setEditable(false);
-            textArea.setFont(new Font("Microsoft JhengHei", Font.PLAIN, 14));
-            textArea.setMargin(new Insets(10, 10, 10, 10));
-
-            JScrollPane scrollPane = new JScrollPane(textArea);
-            scrollPane.setPreferredSize(new Dimension(500, 350));
-
-            // 按鈕列
-            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-            JButton btnPrint = new JButton("列印訂單明細");
-            JButton btnClose = new JButton("關閉");
-
-            btnPrint.addActionListener(e -> {
-                try {
-                    boolean complete = textArea.print();
-                    if (complete) {
-                        JOptionPane.showMessageDialog(dialog, "列印成功！");
-                    } else {
-                        JOptionPane.showMessageDialog(dialog, "列印取消！");
-                    }
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(dialog, "列印失敗：" + ex.getMessage());
-                }
-            });
-
-            btnClose.addActionListener(e -> dialog.dispose());
-
-            buttonPanel.add(btnPrint);
-            buttonPanel.add(btnClose);
-
-            dialog.add(scrollPane, BorderLayout.CENTER);
-            dialog.add(buttonPanel, BorderLayout.SOUTH);
-            dialog.pack();
-            dialog.setLocationRelativeTo(this);
-            dialog.setVisible(true);
-
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "查看訂單細項失敗：" + ex.getMessage());
+        if ("電子錢包".equals(r.getPaymentMethod())) {
+            sb.append("電子錢包餘額：").append(r.getWalletBalance()).append(" 元\n");
+        } else {
+            sb.append("找零：").append(r.getWalletBalance()).append(" 元\n");
         }
+        sb.append("\n=======================");
+
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "訂單細項", true);
+        dialog.setLayout(new BorderLayout());
+
+        JTextArea textArea = new JTextArea(sb.toString());
+        textArea.setEditable(false);
+        textArea.setFont(new Font("Microsoft JhengHei", Font.PLAIN, 14));
+        textArea.setMargin(new Insets(10, 10, 10, 10));
+
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        scrollPane.setPreferredSize(new Dimension(500, 350));
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton btnPrint = new JButton("列印訂單明細");
+        JButton btnClose = new JButton("關閉");
+
+        btnPrint.addActionListener(e -> {
+            try {
+                boolean complete = textArea.print();
+                JOptionPane.showMessageDialog(dialog, complete ? "列印成功！" : "列印取消！");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(dialog, "列印失敗：" + ex.getMessage());
+            }
+        });
+
+        btnClose.addActionListener(e -> dialog.dispose());
+
+        buttonPanel.add(btnPrint);
+        buttonPanel.add(btnClose);
+
+        dialog.add(scrollPane, BorderLayout.CENTER);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+        dialog.pack();
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
     }
 
     private void exportSelectedOrders() {
         try {
-            int[] selectedRows = table.getSelectedRows();
-            if (selectedRows.length == 0) {
-                JOptionPane.showMessageDialog(this, "請先選擇要匯出的訂單！");
-                return;
+            List<OrderReportVo> selectedOrders = new ArrayList<>();
+            for (int i = 0; i < tableModel.getRowCount(); i++) {
+                Boolean checked = (Boolean) tableModel.getValueAt(i, 0);
+                if (checked != null && checked) {
+                    selectedOrders.add(myOrders.get(i));
+                }
             }
 
-            List<OrderReportVo> selectedOrders = new ArrayList<>();
-            for (int row : selectedRows) {
-                selectedOrders.add(myOrders.get(row));
+            if (selectedOrders.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "請先勾選要匯出的訂單！");
+                return;
             }
 
             JFileChooser chooser = new JFileChooser();
@@ -228,9 +241,32 @@ public class OrderPanel extends JPanel {
                 OrderIoUtil.exportToExcel(selectedOrders, filePath);
                 JOptionPane.showMessageDialog(this, "匯出成功！\n" + filePath);
             }
-
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "匯出失敗：" + ex.getMessage());
         }
+    }
+
+    private void showCheckboxColumn() {
+        TableColumn col = table.getColumnModel().getColumn(0);
+        col.setMinWidth(30);
+        col.setMaxWidth(30);
+        col.setPreferredWidth(30);
+        col.setResizable(true);
+        col.setHeaderValue("選");
+        table.revalidate();
+        table.repaint();
+        table.getTableHeader().repaint();
+    }
+
+    private void hideCheckboxColumn() {
+        TableColumn col = table.getColumnModel().getColumn(0);
+        col.setMinWidth(0);
+        col.setMaxWidth(0);
+        col.setPreferredWidth(0);
+        col.setResizable(false);
+        col.setHeaderValue("");
+        table.revalidate();
+        table.repaint();
+        table.getTableHeader().repaint();
     }
 }

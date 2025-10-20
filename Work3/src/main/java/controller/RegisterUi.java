@@ -20,7 +20,7 @@ public class RegisterUi extends JPanel {
 
     public RegisterUi() {
         setLayout(null);
-        setBackground(new Color(240, 248, 255)); // 淡藍背景，方便Design模式預覽
+        setBackground(new Color(255, 255, 255)); // 淡藍背景，方便Design模式預覽
 
         JLabel lblTitle = new JLabel("會員註冊", SwingConstants.CENTER);
         lblTitle.setFont(new Font("微軟正黑體", Font.BOLD, 22));
@@ -46,6 +46,7 @@ public class RegisterUi extends JPanel {
         add(txtGmail);
 
         btnSendCode = new JButton("寄送驗證碼");
+        btnSendCode.setFont(new Font("微軟正黑體", Font.BOLD, 14));
         btnSendCode.setBounds(140, 155, 200, 25);
         add(btnSendCode);
 
@@ -92,7 +93,7 @@ public class RegisterUi extends JPanel {
         try {
             String gmail = txtGmail.getText().trim();
             realCode = memberService.sendGmailVerification(gmail);
-            JOptionPane.showMessageDialog(this, "驗證碼已發送至：" + gmail + "\n(除錯模式顯示：" + realCode + ")");
+            JOptionPane.showMessageDialog(this, "驗證碼已發送至：" + gmail /*+ "\n(除錯模式顯示：" + realCode + ")"*/);
         } catch (InvalidInputException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "格式錯誤", JOptionPane.WARNING_MESSAGE);
         } catch (Exception ex) {

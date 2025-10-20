@@ -24,4 +24,7 @@ public interface OrderDao {
 	List<String> assignEmployeeToPendingOrdersAndReturnIds(String employeeid) throws Exception;
 
 	String getMemberGmailByOrderId(String orderId) throws Exception;
+
+	/** 更新訂單的 wallet_after */
+	void updateWalletAfter(String orderId, int walletAfter) throws Exception;
 }

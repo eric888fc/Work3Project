@@ -15,11 +15,8 @@ import util.OrderTempStore;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * CartPanel：顯示 Cart.txt 內容、刪除商品、付款（現金 / 電子錢包）
@@ -57,6 +54,9 @@ public class CartPanel extends JPanel {
             public boolean isCellEditable(int row, int column) { return false; }
         };
         table = new JTable(model);
+        table.setRowHeight(25);
+        table.getTableHeader().setFont(new Font("新細明體", Font.BOLD, 16));
+        table.setFont(new Font("新細明體", Font.BOLD, 16));
         JScrollPane scroll = new JScrollPane(table);
         add(scroll, BorderLayout.CENTER);
 
@@ -66,7 +66,9 @@ public class CartPanel extends JPanel {
         // 資訊（總金額 / 電子錢包餘額）
         JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 6));
         lblTotal = new JLabel("總金額: 0");
+        lblTotal.setFont(new Font("新細明體", Font.BOLD, 16));
         lblBalance = new JLabel("電子錢包餘額: " + (currentMember != null ? currentMember.getBalance() : 0));
+        lblBalance.setFont(new Font("新細明體", Font.BOLD, 16));
         infoPanel.add(lblTotal);
         infoPanel.add(lblBalance);
         bottomPanel.add(infoPanel, BorderLayout.NORTH);
@@ -74,15 +76,21 @@ public class CartPanel extends JPanel {
         // 支付與按鈕區（右邊）
         JPanel opPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 6));
         cboPayment = new JComboBox<>(new String[]{"電子錢包","現金" });
+        cboPayment.setFont(new Font("新細明體", Font.PLAIN, 16));
         // 現金輸入欄（預設隱藏）
         cashPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         txtCash = new JTextField(8);
-        cashPanel.add(new JLabel("輸入現金:"));
+        txtCash.setFont(new Font("新細明體", Font.PLAIN, 16));
+        JLabel label = new JLabel("輸入現金:");
+        label.setFont(new Font("新細明體", Font.PLAIN, 16));
+        cashPanel.add(label);
         cashPanel.add(txtCash);
         cashPanel.setVisible(false);
 
         btnDelete = new JButton("刪除選中商品");
+        btnDelete.setFont(new Font("新細明體", Font.PLAIN, 16));
         btnPay = new JButton("確認付款");
+        btnPay.setFont(new Font("新細明體", Font.PLAIN, 16));
 
         opPanel.add(cboPayment);
         opPanel.add(cashPanel);
@@ -190,8 +198,27 @@ public class CartPanel extends JPanel {
 
             OrderTempStore.PaymentInfo paymentInfo;
 
+            // 建立訂單物件
+            Order order = new Order();
+            order.setMemberid(currentMember.getMemberId());
+            order.setEmployeeid(null);
+            order.setDate(java.time.LocalDateTime.now()
+                    .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            order.setPaymentMethod(payMethod);
+            order.setTotal(total);
+
+            List<OrderItem> orderItems = new ArrayList<>();
+            for (CartIoUtil.CartItem ci : items) {
+                OrderItem oi = new OrderItem();
+                oi.setProductid(ci.getProduct().getProductid());
+                oi.setAmount(ci.getQuantity());
+                oi.setPrice(ci.getProduct().getPrice());
+                oi.setSubtotal(ci.getSubtotal());
+                orderItems.add(oi);
+            }
+
+            // 電子錢包付款
             if ("電子錢包".equals(payMethod)) {
-                // 檢查餘額
                 if (currentMember.getBalance() < total) {
                     int option = JOptionPane.showConfirmDialog(this,
                             "電子錢包餘額不足，是否前往個人資料頁面儲值？",
@@ -206,16 +233,25 @@ public class CartPanel extends JPanel {
                 }
 
                 int walletBefore = currentMember.getBalance();
-                currentMember.setBalance(walletBefore - total);
+                int walletAfter = walletBefore - total;
+                currentMember.setBalance(walletAfter);
 
-                // 更新資料庫與檔案
+                // 更新會員資料庫與檔案
                 memberService.updateMember(currentMember);
                 MemberIoUtil.saveMember(currentMember);
 
-                int walletAfter = currentMember.getBalance();
-                paymentInfo = new OrderTempStore.PaymentInfo(payMethod, null, null, walletBefore, walletAfter);
+                // 建立訂單，取得 orderId
+                String orderId = orderService.addOrder(order, orderItems);
 
-            } else { // 現金支付
+                // 將 wallet_after 寫入訂單資料庫
+                orderService.updateWalletAfter(orderId, walletAfter);
+
+                paymentInfo = new OrderTempStore.PaymentInfo(payMethod, null, null, walletBefore, walletAfter);
+                OrderTempStore.put(orderId, paymentInfo);
+
+                JOptionPane.showMessageDialog(this, "付款完成，訂單已建立！（編號：" + orderId + "）");
+
+            } else { // 現金付款
                 int cash;
                 try {
                     cash = Integer.parseInt(txtCash.getText().trim());
@@ -228,40 +264,26 @@ public class CartPanel extends JPanel {
                     return;
                 }
                 int change = cash - total;
-                paymentInfo = new OrderTempStore.PaymentInfo(payMethod, cash, change, null, null);
-                JOptionPane.showMessageDialog(this, "付款成功，找零：" + change + " 元");
+
+                // 將找零視為 wallet_after
+                int walletAfter = change;
+
+                // 建立訂單，取得 orderId
+                String orderId = orderService.addOrder(order, orderItems);
+
+                // 將 wallet_after 寫入訂單資料庫
+                orderService.updateWalletAfter(orderId, walletAfter);
+
+                paymentInfo = new OrderTempStore.PaymentInfo(payMethod, cash, change, null, walletAfter);
+                OrderTempStore.put(orderId, paymentInfo);
+
+                JOptionPane.showMessageDialog(this, "付款成功，找零：" + change + " 元\n訂單編號：" + orderId);
             }
-
-            // 建立訂單物件
-            Order order = new Order();
-            order.setMemberid(currentMember.getMemberId());
-            order.setEmployeeid(null);
-            order.setDate(java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-            order.setPaymentMethod(payMethod);
-            order.setTotal(total);
-
-            List<OrderItem> orderItems = new ArrayList<>();
-            for (CartIoUtil.CartItem ci : items) {
-                OrderItem oi = new OrderItem();
-                oi.setProductid(ci.getProduct().getProductid());
-                oi.setAmount(ci.getQuantity());
-                oi.setPrice(ci.getProduct().getPrice());
-                oi.setSubtotal(ci.getSubtotal());
-                orderItems.add(oi);
-            }
-
-            // 建立訂單，取得 orderId
-            String orderId = orderService.addOrder(order, orderItems);
-
-            // 放入暫存器
-            OrderTempStore.put(orderId, paymentInfo);
 
             // 清空購物車並刷新
             CartIoUtil.clearCart();
             loadCartData();
             updateTotalAndBalance();
-
-            JOptionPane.showMessageDialog(this, "付款完成，訂單已建立！（編號：" + orderId + "）");
 
             // 跳轉到外送員面板
             JFrame top = (JFrame) SwingUtilities.getWindowAncestor(this);
@@ -274,6 +296,8 @@ public class CartPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "付款失敗：" + ex.getMessage());
         }
     }
+
+
 
 
 

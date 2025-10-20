@@ -12,7 +12,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.util.List;
 
 public class EmployeePanel extends JPanel {
@@ -24,10 +23,7 @@ public class EmployeePanel extends JPanel {
     private JPanel selectedCard = null;
     private Employee selectedEmployee = null;
 
-    private Member currentMember; // ✅ 加上目前登入會員
-
     public EmployeePanel(Member member) {
-        this.currentMember = member;
         initComponents();
         loadEmployeesSafe();
     }
@@ -40,6 +36,7 @@ public class EmployeePanel extends JPanel {
         add(scrollPane, BorderLayout.CENTER);
 
         JButton btnAssign = new JButton("確認指派");
+        btnAssign.setFont(new Font("新細明體", Font.BOLD, 16));
         btnAssign.addActionListener(e -> confirmAssign());
         JPanel btnPanel = new JPanel();
         btnPanel.add(btnAssign);
@@ -69,14 +66,14 @@ public class EmployeePanel extends JPanel {
 
     private JPanel createEmployeeCard(Employee emp) {
         JPanel card = new JPanel(new BorderLayout());
-        card.setPreferredSize(new Dimension(150, 180));
+        card.setPreferredSize(new Dimension(200, 300));
         card.setBorder(BorderFactory.createLineBorder(Color.GRAY));
         card.setBackground(Color.WHITE);
 
         // ===== 圖片載入（支援JAR） =====
         try {
             JLabel imgLabel = new JLabel();
-            imgLabel.setPreferredSize(new Dimension(150, 120));
+            imgLabel.setPreferredSize(new Dimension(200, 240));
             imgLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
             // 使用 ClassLoader 載入圖片資源
@@ -84,7 +81,7 @@ public class EmployeePanel extends JPanel {
             if (imgUrl != null) {
                 ImageIcon originalIcon = new ImageIcon(imgUrl);
                 Image scaledImage = originalIcon.getImage()
-                        .getScaledInstance(150, 120, Image.SCALE_SMOOTH);
+                        .getScaledInstance(200, 240, Image.SCALE_SMOOTH);
                 imgLabel.setIcon(new ImageIcon(scaledImage));
             } else {
                 imgLabel.setText("無圖片");
@@ -144,6 +141,13 @@ public class EmployeePanel extends JPanel {
                 // 取得被指派的訂單 ID 清單
                 List<String> assignedOrderIds = orderService.assignEmployeeToPendingOrdersAndReturnIds(selectedEmployee.getEmployeeid());
 
+                // 🔹 若無未指派訂單
+                if (assignedOrderIds == null || assignedOrderIds.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "您目前沒有可指派的訂單！");
+                    return;
+                }
+
+                // 🔹 有訂單才進行寄信
                 for (String orderId : assignedOrderIds) {
                     // 查出該訂單會員的 gmail
                     String recipient = orderService.getMemberGmailByOrderId(orderId);
@@ -152,12 +156,13 @@ public class EmployeePanel extends JPanel {
                 }
 
                 JOptionPane.showMessageDialog(this,
-                        "成功指派 " + assignedOrderIds.size() + " 筆訂單！訂單明細已寄送給相關會員。");
+                        "成功指派 " + assignedOrderIds.size() + " 筆訂單！\n訂單明細已寄送給相關會員。");
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "指派失敗：" + ex.getMessage());
             }
         }
     }
+
 
 
 

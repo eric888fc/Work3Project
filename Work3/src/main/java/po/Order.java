@@ -10,12 +10,13 @@ public class Order {
     private String date;
     private String paymentMethod;
     private int total;
+    private int walletAfter;
 	public Order() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-	public Order(String orderid, String memberid, String employeeid, String date, String paymentMethod,
-			int total) {
+	public Order(String orderid, String memberid, String employeeid, String date, String paymentMethod, int total,
+			int walletAfter) {
 		super();
 		this.orderid = orderid;
 		this.memberid = memberid;
@@ -23,6 +24,7 @@ public class Order {
 		this.date = date;
 		this.paymentMethod = paymentMethod;
 		this.total = total;
+		this.walletAfter = walletAfter;
 	}
 	public String getOrderid() {
 		return orderid;
@@ -60,8 +62,12 @@ public class Order {
 	public void setTotal(int total) {
 		this.total = total;
 	}
-
-	
+	public int getWalletAfter() {
+		return walletAfter;
+	}
+	public void setWalletAfter(int walletAfter) {
+		this.walletAfter = walletAfter;
+	}
 	
     
 }

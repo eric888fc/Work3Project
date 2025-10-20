@@ -8,7 +8,6 @@ import util.DBUtil;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class OrderDaoImpl implements OrderDao {
 
@@ -17,15 +16,15 @@ public class OrderDaoImpl implements OrderDao {
     /** 新增訂單（header + 明細）並自動生成 orderid */
     @Override
     public synchronized String addOrder(Order order, List<OrderItem> items) throws Exception {
-        // 1) 產生下一個順序 orderId（O001,O002…）
+        // 產生下一個順序 orderId（O001,O002…）
         String orderId = generateOrderId();
         order.setOrderid(orderId);
 
         try {
             conn.setAutoCommit(false);
 
-            // 插入 header
-            String sqlOrder = "INSERT INTO orders(orderid, memberid, employeeid, date, payment_method, total) VALUES (?,?,?,?,?,?)";
+            // 插入 header，加入 wallet_after 欄位
+            String sqlOrder = "INSERT INTO orders(orderid, memberid, employeeid, date, payment_method, total, wallet_after) VALUES (?,?,?,?,?,?,?)";
             try (PreparedStatement ps = conn.prepareStatement(sqlOrder)) {
                 ps.setString(1, order.getOrderid());
                 ps.setString(2, order.getMemberid());
@@ -33,6 +32,7 @@ public class OrderDaoImpl implements OrderDao {
                 ps.setString(4, order.getDate());
                 ps.setString(5, order.getPaymentMethod());
                 ps.setInt(6, order.getTotal());
+                ps.setObject(7, order.getWalletAfter()); // 新增欄位
                 ps.executeUpdate();
             }
 
@@ -59,6 +59,18 @@ public class OrderDaoImpl implements OrderDao {
             conn.setAutoCommit(true);
         }
     }
+
+    /** 更新訂單的 wallet_after */
+    @Override
+    public void updateWalletAfter(String orderId, int walletAfter) throws Exception {
+        String sql = "UPDATE orders SET wallet_after=? WHERE orderid=?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, walletAfter);
+            ps.setString(2, orderId);
+            ps.executeUpdate();
+        }
+    }
+
     @Override
     public String generateOrderId() throws SQLException {
         String sql = "SELECT orderid FROM orders ORDER BY orderid DESC LIMIT 1";
@@ -70,7 +82,6 @@ public class OrderDaoImpl implements OrderDao {
                     int num = Integer.parseInt(last.substring(1)) + 1;
                     return String.format("O%03d", num);
                 } catch (NumberFormatException ex) {
-                    // 若格式不對 fallback
                     return "O001";
                 }
             } else {
@@ -92,8 +103,7 @@ public class OrderDaoImpl implements OrderDao {
 
     @Override
     public List<Order> getAllOrders() throws Exception {
-        // TODO: 實作查詢所有訂單
-        return null;
+        return null; // TODO
     }
 
     @Override
@@ -104,12 +114,10 @@ public class OrderDaoImpl implements OrderDao {
             ps.executeUpdate();
         }
     }
-    
+
     @Override
     public List<String> assignEmployeeToPendingOrdersAndReturnIds(String employeeid) throws Exception {
         List<String> orderIds = new ArrayList<>();
-
-        // 先查出所有尚未指派的訂單
         String selectSql = "SELECT orderid FROM orders WHERE employeeid IS NULL";
         try (PreparedStatement ps = conn.prepareStatement(selectSql);
              ResultSet rs = ps.executeQuery()) {
@@ -118,29 +126,23 @@ public class OrderDaoImpl implements OrderDao {
             }
         }
 
-        // 更新外送員
         String updateSql = "UPDATE orders SET employeeid=? WHERE employeeid IS NULL";
         try (PreparedStatement ps = conn.prepareStatement(updateSql)) {
             ps.setString(1, employeeid);
             ps.executeUpdate();
         }
-
         return orderIds;
     }
+
     @Override
     public String getMemberGmailByOrderId(String orderId) throws Exception {
         String sql = "SELECT m.gmail FROM orders o JOIN member m ON o.memberid = m.memberid WHERE o.orderid = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, orderId);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getString("gmail");
-                }
+                if (rs.next()) return rs.getString("gmail");
             }
         }
-        return null; // 找不到就回 null
+        return null;
     }
-
-
-
 }

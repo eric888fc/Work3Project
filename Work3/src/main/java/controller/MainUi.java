@@ -40,8 +40,9 @@ public class MainUi extends JFrame {
         headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 5, 20));
 
         JLabel lblTitle = new JLabel("Uber Cat 外送平台", SwingConstants.LEFT);
-        lblTitle.setForeground(Color.WHITE);
-        lblTitle.setFont(new Font("微軟正黑體", Font.BOLD, 22));
+        lblTitle.setBackground(new Color(0, 0, 0));
+        lblTitle.setForeground(Color.BLACK);
+        lblTitle.setFont(new Font("微軟正黑體", Font.BOLD, 24));
 
         lblUserName = new JLabel("您好，" + member.getName(), SwingConstants.RIGHT);
         lblUserName.setForeground(Color.WHITE);
@@ -116,42 +117,64 @@ public class MainUi extends JFrame {
         contentPanel.add(profilePanel, "PROFILE");
         contentPanel.add(orderPanel, "ORDERS");
 
-        // ===== 按鈕切換功能 =====
+     // ===== 按鈕切換功能 =====
         btnStore.addActionListener(e -> switchPanel("STORE"));
+
         btnCart.addActionListener(e -> {
             Member latest = MemberIoUtil.readMember();
             if (latest != null) {
                 currentMember = latest;
-                ((CartPanel) cartPanel).refreshMember(currentMember);
+                if (cartPanel instanceof CartPanel) {
+                    ((CartPanel) cartPanel).refreshMember(currentMember);
+                }
                 switchPanel("CART");
             } else {
                 JOptionPane.showMessageDialog(this, "尚未登入，請重新登入！");
             }
         });
+
         btnEmployee.addActionListener(e -> switchPanel("EMPLOYEE"));
+
         btnProfile.addActionListener(e -> {
             Member latest = MemberIoUtil.readMember();
             if (latest != null) {
                 currentMember = latest;
+
+                // 移除舊的 ProfilePanel，避免記憶體累積
+                if (contentPanel.getComponentCount() > 0) {
+                    for (Component comp : contentPanel.getComponents()) {
+                        if (comp instanceof ProfilePanel) {
+                            contentPanel.remove(comp);
+                            break;
+                        }
+                    }
+                }
+
+                // 重新建立新的 ProfilePanel
                 ProfilePanel refreshedProfile = new ProfilePanel(currentMember);
-                contentPanel.add(refreshedProfile, "PROFILE_REFRESH");
-                switchPanel("PROFILE_REFRESH");
+                contentPanel.add(refreshedProfile, "PROFILE");
+                switchPanel("PROFILE");
+
             } else {
                 JOptionPane.showMessageDialog(this, "尚未登入，請重新登入！");
             }
         });
+
         btnOrders.addActionListener(e -> {
             Member latest = MemberIoUtil.readMember();
             if (latest != null) {
                 currentMember = latest;
-                if (orderPanel instanceof OrderPanel) {
-                    ((OrderPanel) orderPanel).refreshData(); // 重新載入最新資料庫訂單
-                }
+
+                // 🔹 若已存在 OrderPanel，更新會員並重新載入資料
+                    ((OrderPanel) orderPanel).updateMember(currentMember);
+                    ((OrderPanel) orderPanel).refreshData();
+
                 switchPanel("ORDERS");
             } else {
                 JOptionPane.showMessageDialog(this, "尚未登入，請重新登入！");
             }
         });
+
 
 
 

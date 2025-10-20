@@ -27,6 +27,9 @@ public class AdminEmployeeUi extends JPanel {
             public boolean isCellEditable(int r, int c) { return false; }
         };
         table = new JTable(tableModel);
+        table.setRowHeight(25);
+        table.getTableHeader().setFont(new Font("Microsoft JhengHei", Font.BOLD, 14));
+        table.setFont(new Font("Microsoft JhengHei", Font.PLAIN, 13));
         add(new JScrollPane(table), BorderLayout.CENTER);
 
         // ===== 下方輸入欄 =====
@@ -34,23 +37,38 @@ public class AdminEmployeeUi extends JPanel {
 
         JPanel input = new JPanel(new FlowLayout());
         txtEmployeeId = new JTextField(8);
+        txtEmployeeId.setFont(new Font("新細明體", Font.BOLD, 16));
         txtName = new JTextField(10);
+        txtName.setFont(new Font("新細明體", Font.BOLD, 16));
         txtImage = new JTextField(15);
+        txtImage.setFont(new Font("新細明體", Font.BOLD, 16));
         cboArea = new JComboBox<>(new String[]{
                 "台北市","新北市","桃園市","台中市","台南市","高雄市","基隆市","新竹市","嘉義市"
         });
+        cboArea.setFont(new Font("新細明體", Font.BOLD, 16));
 
-        input.add(new JLabel("外送員ID:")); input.add(txtEmployeeId);
-        input.add(new JLabel("姓名:")); input.add(txtName);
-        input.add(new JLabel("圖片路徑:")); input.add(txtImage);
-        input.add(new JLabel("地區:")); input.add(cboArea);
+        JLabel label = new JLabel("外送員ID:");
+        label.setFont(new Font("新細明體", Font.BOLD, 16));
+        input.add(label); input.add(txtEmployeeId);
+        JLabel label_1 = new JLabel("姓名:");
+        label_1.setFont(new Font("新細明體", Font.BOLD, 16));
+        input.add(label_1); input.add(txtName);
+        JLabel label_2 = new JLabel("圖片路徑:");
+        label_2.setFont(new Font("新細明體", Font.BOLD, 16));
+        input.add(label_2); input.add(txtImage);
+        JLabel label_3 = new JLabel("地區:");
+        label_3.setFont(new Font("新細明體", Font.BOLD, 16));
+        input.add(label_3); input.add(cboArea);
 
         bottom.add(input);
 
         JPanel btnPanel = new JPanel();
         JButton btnAdd = new JButton("新增");
+        btnAdd.setFont(new Font("新細明體", Font.BOLD, 16));
         JButton btnUpdate = new JButton("修改");
+        btnUpdate.setFont(new Font("新細明體", Font.BOLD, 16));
         JButton btnDelete = new JButton("刪除");
+        btnDelete.setFont(new Font("新細明體", Font.BOLD, 16));
         btnPanel.add(btnAdd); btnPanel.add(btnUpdate); btnPanel.add(btnDelete);
         bottom.add(btnPanel);
 

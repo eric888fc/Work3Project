@@ -27,6 +27,9 @@ public class AdminProductUi extends JPanel {
             public boolean isCellEditable(int row, int column) { return false; }
         };
         table = new JTable(tableModel);
+        table.setRowHeight(25);
+        table.getTableHeader().setFont(new Font("Microsoft JhengHei", Font.BOLD, 14));
+        table.setFont(new Font("Microsoft JhengHei", Font.PLAIN, 13));
         add(new JScrollPane(table), BorderLayout.CENTER);
 
         // ===== 下方操作面板 =====
@@ -34,16 +37,31 @@ public class AdminProductUi extends JPanel {
 
         JPanel inputPanel = new JPanel(new FlowLayout());
         txtProductId = new JTextField(8);
+        txtProductId.setFont(new Font("新細明體", Font.BOLD, 16));
         cboSort = new JComboBox<>(new String[]{"藥品","工具","食材","子彈"});
+        cboSort.setFont(new Font("新細明體", Font.BOLD, 16));
         txtName = new JTextField(10);
+        txtName.setFont(new Font("新細明體", Font.BOLD, 16));
         txtPrice = new JTextField(5);
+        txtPrice.setFont(new Font("新細明體", Font.BOLD, 16));
         txtImage = new JTextField(15);
+        txtImage.setFont(new Font("新細明體", Font.BOLD, 16));
 
-        inputPanel.add(new JLabel("ProductID:")); inputPanel.add(txtProductId);
-        inputPanel.add(new JLabel("分類:")); inputPanel.add(cboSort);
-        inputPanel.add(new JLabel("名稱:")); inputPanel.add(txtName);
-        inputPanel.add(new JLabel("價格:")); inputPanel.add(txtPrice);
-        inputPanel.add(new JLabel("圖片路徑:")); inputPanel.add(txtImage);
+        JLabel label = new JLabel("ProductID:");
+        label.setFont(new Font("新細明體", Font.BOLD, 16));
+        inputPanel.add(label); inputPanel.add(txtProductId);
+        JLabel label_1 = new JLabel("分類:");
+        label_1.setFont(new Font("新細明體", Font.BOLD, 16));
+        inputPanel.add(label_1); inputPanel.add(cboSort);
+        JLabel label_2 = new JLabel("名稱:");
+        label_2.setFont(new Font("新細明體", Font.BOLD, 16));
+        inputPanel.add(label_2); inputPanel.add(txtName);
+        JLabel label_3 = new JLabel("價格:");
+        label_3.setFont(new Font("新細明體", Font.BOLD, 16));
+        inputPanel.add(label_3); inputPanel.add(txtPrice);
+        JLabel label_4 = new JLabel("圖片路徑:");
+        label_4.setFont(new Font("新細明體", Font.BOLD, 16));
+        inputPanel.add(label_4); inputPanel.add(txtImage);
 
         bottomPanel.add(inputPanel);
 

@@ -25,14 +25,14 @@ public class LoginUi extends JFrame {
         setLocationRelativeTo(null);
         getContentPane().setLayout(null);
 
-        JLabel lblTitle = new JLabel("外送平台登入系統", SwingConstants.CENTER);
+        JLabel lblTitle = new JLabel("Uber Cat登入", SwingConstants.CENTER);
         lblTitle.setFont(new Font("微軟正黑體", Font.BOLD, 20));
         lblTitle.setBounds(60, 20, 280, 30);
         getContentPane().add(lblTitle);
 
-        JLabel lblGmail = new JLabel("Gmail：");
+        JLabel lblGmail = new JLabel("Gmail/管理員帳號：");
         lblGmail.setFont(new Font("微軟正黑體", Font.PLAIN, 14));
-        lblGmail.setBounds(60, 80, 80, 25);
+        lblGmail.setBounds(10, 80, 130, 25);
         getContentPane().add(lblGmail);
 
         txtGmail = new JTextField();
@@ -109,7 +109,7 @@ public class LoginUi extends JFrame {
         registerFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         registerFrame.setSize(420, 420);
         registerFrame.setLocationRelativeTo(this);
-        registerFrame.add(new RegisterUi()); // 加入 JPanel
+        registerFrame.getContentPane().add(new RegisterUi()); // 加入 JPanel
         registerFrame.setVisible(true);
         dispose();
     }

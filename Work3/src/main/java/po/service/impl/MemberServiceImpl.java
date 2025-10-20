@@ -18,10 +18,11 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public void register(Member member) throws Exception {
-        // ===== 驗證姓名 =====
-        if (!Pattern.matches("^[\\u4e00-\\u9fa5a-zA-Z]{2,20}$", member.getName())) {
-            throw new InvalidInputException("姓名只能為 2~20 個中英文字符");
-        }
+    	// ===== 驗證姓名 =====
+    	if (!Pattern.matches("^[\\u4e00-\\u9fa5a-zA-Z0-9]{2,20}$", member.getName())) {
+    	    throw new InvalidInputException("姓名只能為 2~20 個中英文或數字字符");
+    	}
+
 
         // ===== 驗證 Gmail =====
         if (!Pattern.matches("^[\\w.-]+@[\\w.-]+\\.\\w+$", member.getGmail())) {

@@ -36,9 +36,12 @@ public class StorePanel extends JPanel {
 
         // ===== 上方篩選列 =====
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
-        filterPanel.add(new JLabel("商品分類："));
+        JLabel label = new JLabel("商品分類：");
+        label.setFont(new Font("新細明體", Font.BOLD, 16));
+        filterPanel.add(label);
         String[] sorts = {"所有", "藥品", "工具", "食材", "子彈"};
         cboSort = new JComboBox<>(sorts);
+        cboSort.setFont(new Font("新細明體", Font.BOLD, 16));
         filterPanel.add(cboSort);
         add(filterPanel, BorderLayout.NORTH);
 

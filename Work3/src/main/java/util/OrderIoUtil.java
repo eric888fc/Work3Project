@@ -47,7 +47,7 @@ public class OrderIoUtil {
         // ===== 標題列 =====
         String[] headers = {
                 "訂單編號", "會員名稱", "Gmail", "外送員",
-                "付款方式", "商品明細", "總金額", "電子錢包餘額", "日期"
+                "付款方式", "商品明細", "總金額", "電子錢包餘額/找零", "日期"
         };
         Row headerRow = sheet.createRow(0);
         for (int i = 0; i < headers.length; i++) {
@@ -84,7 +84,7 @@ public class OrderIoUtil {
         sheet.setColumnWidth(4, 10 * 256);
         sheet.setColumnWidth(5, 50 * 256);
         sheet.setColumnWidth(6, 12 * 256);
-        sheet.setColumnWidth(7, 14 * 256);
+        sheet.setColumnWidth(7, 20 * 256);
         sheet.setColumnWidth(8, 22 * 256);
 
         // ===== 儲存檔案 =====
