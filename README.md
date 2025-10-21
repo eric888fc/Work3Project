@@ -18,16 +18,18 @@
 
 📦 src/main/java
 ├── controller/ # 視覺化介面控制層 (Swing)
-│ ├── LoginUi.java # 登入畫面（程式進入點）
+│ ├── LoginUi.java # 登入畫面（main主程式）
 │ ├── MainUi.java # 主選單 / 首頁
 │ ├── StorePanel.java # 商品瀏覽與加入購物車
 │ ├── CartPanel.java # 購物車頁面
-│ ├── OrderPanel.java # 訂單管理
-│ ├── EmployeePanel.java # 外送員管理
-│ ├── MemberPanel.java # 會員中心
+│ ├── EmployeePanel.java # 外送員頁面
+│ ├── OrderPanel.java # 訂單紀錄檢視
 │ ├── ProfilePanel.java # 個人資料設定
-│ └── AdminUi.java # 後台管理介面
-│
+│ ├── AdminUi.java # 後台管理介面
+│ ├── AdminProductPanel.java # 商品管理
+│ ├── AdminEmployeePanel.java # 外送員管理
+│ ├── AdminOrderUi.java # 後台訂單檢視(全會員)
+│ └──
 ├── po/ # 實體類別 (POJO)
 │ ├── Member.java
 │ ├── Product.java
@@ -61,9 +63,13 @@
 │ └── ...
 │
 └── util/ # 工具類
-├── DBUtil.java # 資料庫連線工具
-├── EmailUtil.java # 郵件寄送功能
-└── CartIoUtil.java # 購物車資料存取工具
+│ ├── DBUtil.java # 資料庫連線工具
+│ ├── MailUtil.java # 驗證碼寄送功能
+│ ├── EmailUtil.java # 訂單寄送功能
+│ ├── MemberIoUtil.java # 使用者資料存取工具
+│ ├── OrderIoUtil.java # 匯出報表Excel
+│ ├── OrderTempStore.java # 紀錄付款方式以及餘額暫存器
+│ └── CartIoUtil.java # 購物車資料存取工具
 
 ```
 
@@ -71,7 +77,7 @@
 
 | 層級 | 功能 | 說明 |
 |------|------|------|
-| **Controller (UI)** | 視覺化介面層 | 處理使用者操作與 Swing 事件監聽，呼叫 Service 層。 |
+| **Controller (UI)** | 視覺化介面層 | 處理使用者操作與 Swing 事件監聽，呼叫 Service 跟Util。 |
 | **Service (業務邏輯)** | 邏輯處理層 | 處理會員登入、訂單建立、派單等核心邏輯。 |
 | **DAO (資料存取)** | 資料層 | 負責連接資料庫（MySQL）並進行 CRUD 操作。 |
 | **PO (實體類)** | 資料模型層 | 封裝會員、商品、訂單等物件屬性。 |
@@ -85,9 +91,9 @@
 |------|-----------|
 | **會員功能** | 登入 / 註冊 / 修改個資 / 錢包餘額管理 |
 | **商品管理** | 瀏覽商品、加入購物車、修改數量 |
-| **購物車系統** | 檢視購物明細、選擇付款方式（現金 / 電子錢包） |
-| **訂單系統** | 建立訂單、顯示歷史訂單、查看派送員 |
-| **外送員派單** | 管理員可批量指派未處理訂單並寄送通知信 |
+| **購物車系統** | 檢視購物明細、選擇付款方式（現金 / 電子錢包)、建立訂單 |
+| **訂單系統** | 顯示歷史訂單、搜尋訂單、匯出報表|
+| **外送員派單** | 使用者指派未處理訂單給外送員並寄送通知信 |
 | **報表匯出** | 支援 Excel 匯出訂單明細 |
 | **郵件通知** | 訂單建立或派單後自動寄信至會員 Gmail |
 
@@ -99,13 +105,13 @@
 
 1. 檢查會員餘額  
 2. 若不足 → 引導至「個人資料」頁面儲值  
-3. 若足夠 → 扣款、更新 `wallet_after` 欄位  
-4. 建立訂單並寄送通知信  
+3. 若足夠 → 扣款、更新 member.balance跟orders.wallet_after欄位  
+4. 建立訂單 
 
 ### 現金付款
 
 1. 輸入金額 → 自動計算找零  
-2. 儲存訂單 → 找零金額同步更新至訂單  
+2. 儲存訂單 → 找零金額同步更新至orders.wallet_after
 3. 顯示「找零金額」與訂單編號  
 
 ---
@@ -175,11 +181,14 @@
 ```
 🧰 資料庫結構（主要資料表）
 ```
-資料表	說明
-member	儲存會員帳號、密碼、餘額等資訊
-product	商品清單與價格
-orders	訂單主檔（含 wallet_after）
-order_items	訂單明細
-employee	外送員資料
-admin	管理者帳號
+table資料表	說明
+	member	儲存會員id、名稱、Gmail、密碼、地址、餘額等資訊
+	product	商品資訊與價格
+	orders	訂單主檔（含 orderid、memberid、employeeid、日期、付款方式、總金額跟電子錢包餘額/找零）
+	order_items	訂單明細
+	employee	外送員資料
+	admin	管理者帳號
+
+view介面
+	order_report orderid, 會員名稱, 會員gmail,訂單細項, 總金額, 外送員名稱, 日期,付款方式, 電子錢包餘額/找零
 ```
