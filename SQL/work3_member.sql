@@ -34,7 +34,7 @@ CREATE TABLE `member` (
   `balance` int DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `memberid` (`memberid`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -43,7 +43,7 @@ CREATE TABLE `member` (
 
 LOCK TABLES `member` WRITE;
 /*!40000 ALTER TABLE `member` DISABLE KEYS */;
-INSERT INTO `member` VALUES (1,'M001','eric2','1','a00000','台中市板橋區',1835),(5,'M002','User2','a247047774@gmail.com','b12345678','新北市汐止區',1090),(6,'M003','User3','a35124851@gmail.com','c12345678','高雄市嘉義區',500);
+INSERT INTO `member` VALUES (1,'M001','eric2','1','a00000','台中市板橋區',1185),(5,'M002','User2','a247047774@gmail.com','b12345678','新北市汐止區',9820),(6,'M003','User3','a35124851@gmail.com','c12345678','高雄市嘉義區',500),(7,'M004','中正彭于晏','a3512485@gmail.com','D12345678','花蓮市中正區',925);
 /*!40000 ALTER TABLE `member` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -56,4 +56,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-10-20 17:05:03
+-- Dump completed on 2025-10-20 22:02:55
