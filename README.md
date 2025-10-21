@@ -1,9 +1,5 @@
-# 🚚 Delivery Platform — Java Swing 外送系統
+# 🚚 Uber Cat 外送系統
 
-![Java](https://img.shields.io/badge/Java-Swing-orange?logo=java)
-![License](https://img.shields.io/badge/license-MIT-green)
-![Build](https://img.shields.io/badge/build-Maven-blue)
-![UI](https://img.shields.io/badge/UI-Desktop-blueviolet)
 
 > 一個以 **Java Swing** 製作的桌面應用程式，模擬真實的「外送平台」運作流程。  
 > 系統支援會員登入、購物、下單、錢包支付、訂單派送、後台管理等完整功能。  
@@ -24,9 +20,9 @@
 ├── controller/ # 視覺化介面控制層 (Swing)
 │ ├── LoginUi.java # 登入畫面（程式進入點）
 │ ├── MainUi.java # 主選單 / 首頁
+│ ├── StorePanel.java # 商品瀏覽與加入購物車
 │ ├── CartPanel.java # 購物車頁面
 │ ├── OrderPanel.java # 訂單管理
-│ ├── ProductPanel.java # 商品瀏覽與加入購物車
 │ ├── EmployeePanel.java # 外送員管理
 │ ├── MemberPanel.java # 會員中心
 │ ├── ProfilePanel.java # 個人資料設定
