@@ -87,15 +87,46 @@
 
 ## 🖥️ 功能介紹
 
-| 模組 | 功能描述 |
-|------|-----------|
-| **會員功能** | 登入 / 註冊 / 修改個資 / 錢包餘額管理 |
-| **商品管理** | 瀏覽商品、加入購物車、修改數量 |
-| **購物車系統** | 檢視購物明細、選擇付款方式（現金 / 電子錢包)、建立訂單 |
-| **訂單系統** | 顯示歷史訂單、搜尋訂單、匯出報表|
-| **外送員派單** | 使用者指派未處理訂單給外送員並寄送通知信 |
-| **報表匯出** | 支援 Excel 匯出訂單明細 |
-| **郵件通知** | 訂單建立或派單後自動寄信至會員 Gmail |
+1. 會員登入與註冊
+支援驗證碼寄送功能 (MailUtil)，確保 Email 真實性。管理者與一般會員共用入口，依帳號自動判斷權限。
+ <table>
+        <tr>
+          <td valign="top" width="50%"><img width="712" height="527" alt="image" src="https://github.com/user-attachments/assets/03c81efb-3b0c-42e8-bc16-5642637dd0dc" />
+</td>
+          <td valign="top" width="50%"><img width="773" height="788" alt="image" src="https://github.com/user-attachments/assets/1e6d972c-f523-4b06-b931-5f88074a0a19" />
+</td>
+        </tr>
+      </table>
+
+2. 商店首頁 (StorePanel)
+顯示商品列表，支援加入購物車。左上有分類篩選功能。
+<img width="1083" height="846" alt="image" src="https://github.com/user-attachments/assets/715e4550-1fcb-4af1-8680-62b888170b30" />
+
+3. 購物車與結帳 (CartPanel)
+使用者可在此調整數量或刪除商品。
+
+電子錢包付款：系統自動檢查餘額，餘額不足會阻擋結帳。
+
+現金付款：輸入支付金額後，系統自動計算找零。
+<img width="1155" height="906" alt="image" src="https://github.com/user-attachments/assets/56c0db5d-40fb-4e5a-86e6-d43e08a0f703" />
+
+4. 外送員派單 (EmployeePanel)
+針對「未處理」的訂單，可模擬指派外送員，系統會觸發 EmailUtil 發送通知信。
+<table>
+        <tr>
+          <td valign="top" width="50%"><img width="996" height="775" alt="image" src="https://github.com/user-attachments/assets/102f05f4-5a0d-43e0-836f-ce325496194d" />
+</td>
+          <td valign="top" width="50%"><img width="585" height="798" alt="image" src="https://github.com/user-attachments/assets/315415bb-0b0a-45e0-8b2f-5f222bf0b0fb" />
+</td>
+        </tr>
+      </table>
+
+5. 訂單管理
+會員可查看歷史訂單狀態，支援 匯出 Excel 功能。
+<img width="1033" height="810" alt="image" src="https://github.com/user-attachments/assets/721ae7bd-a8a2-40b6-a9c9-a351f0eab32b" />
+6. 後台管理 (AdminUi)
+管理者專屬介面，可進行商品的上架、下架、修改價格，以及管理外送員名單。
+<img width="1350" height="901" alt="image" src="https://github.com/user-attachments/assets/5c045361-4fa2-4f7b-b2fa-d6052b9b44f2" />
 
 ---
 
