@@ -8,8 +8,8 @@ import java.util.Properties;
 
 public class MailUtil {
 
-    private static final String FROM_EMAIL = "service0000test@gmail.com"; // 換成你自己的 Gmail
-    private static final String APP_PASSWORD = "wvzf mlse qzym zhrj";     // 剛才建立的 App Password
+    private static final String FROM_EMAIL =  // 換成你自己的 Gmail
+    private static final String APP_PASSWORD =    // 剛才建立的 App Password
 
     public static void sendMail(String to, String subject, String text) throws MessagingException {
         // SMTP 伺服器設定
